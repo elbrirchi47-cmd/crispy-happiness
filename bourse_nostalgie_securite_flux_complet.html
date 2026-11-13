@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>✨ Bourse Nostalgie — Marché Live, Flux Auto & Prévisions</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:#0a0710;color:#e2e8f0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;font-size:13px;line-height:1.5;min-height:100vh;overflow-x:hidden}
+  ::-webkit-scrollbar{width:6px;height:6px;background:#130e1f}
+  ::-webkit-scrollbar-thumb{background:#f59e0b;border-radius:3px}
+  
+  .header{background:linear-gradient(135deg,#130e1f 0%,#1a1333 50%,#130e1f 100%);border-bottom:1px solid rgba(245,158,11,0.3);padding:14px 28px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:50;backdrop-filter:blur(10px)}
+  .brand{display:flex;align-items:center;gap:12px}
+  .brand-icon{width:42px;height:42px;background:linear-gradient(135deg,#f59e0b,#8b5cf6);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;color:#fff;box-shadow:0 0 20px rgba(245,158,11,0.4)}
+  .brand-title{font-size:22px;font-weight:900;letter-spacing:-0.5px;color:#fff}
+  .brand-title span{color:#f59e0b}
+  
+  /* Ticker Live */
+  .ticker-wrap{width:100%;overflow:hidden;background:#000;border-bottom:1px solid #2d2447;height:30px;display:flex;align-items:center;font-family:monospace;font-size:11px;position:relative}
+  .ticker{display:flex;white-space:nowrap;width:max-content;animation:ticker 40s linear infinite}
+  .ticker:hover{animation-play-state:paused}
+  .ticker-item{padding-right:30px;color:#cbd5e1}
+  .ticker-item span.up{color:#10b981;font-weight:bold}
+  .ticker-item span.down{color:#ef4444;font-weight:bold}
+  @keyframes ticker { 0% { transform: translate3d(0, 0, 0); } 100% { transform: translate3d(-50%, 0, 0); } }
+
+  .container{max-width:1440px;margin:0 auto;padding:24px}
+  
+  .hero{background:radial-gradient(ellipse at top left,rgba(245,158,11,0.15),transparent 60%),linear-gradient(135deg,#130e1f 0%,#0f0b17 100%);border:1px solid rgba(245,158,11,0.3);border-radius:20px;padding:28px;margin-bottom:24px}
+  .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-top:24px;padding-top:20px;border-top:1px solid rgba(255,255,255,0.08)}
+  .stat-card{background:rgba(10,7,16,0.7);border:1px solid rgba(255,255,255,0.06);border-radius:14px;padding:16px;transition:transform 0.2s}
+  .stat-card .lbl{font-size:11px;color:#94a3b8;text-transform:uppercase;font-weight:600}
+  .stat-card .val{font-size:24px;font-weight:900;color:#fff;margin-top:4px}
+  
+  .tabs{display:flex;gap:8px;border-bottom:1px solid #2d2447;padding-bottom:8px;margin-bottom:24px;overflow-x:auto}
+  .tab-btn{background:transparent;border:none;color:#94a3b8;font-size:13px;font-weight:700;padding:10px 18px;border-radius:10px;cursor:pointer;transition:all 0.2s}
+  .tab-btn.active{background:rgba(245,158,11,0.15);color:#fbbf24;border:1px solid rgba(245,158,11,0.4)}
+  .tab-btn:hover:not(.active){color:#fff;background:rgba(255,255,255,0.04)}
+
+  .catalog-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px}
+  .card{background:#130e1f;border:1px solid #2d2447;border-radius:16px;padding:20px;display:flex;flex-direction:column;justify-content:space-between;transition:all 0.3s;position:relative;overflow:hidden}
+  .card:hover{border-color:rgba(245,158,11,0.5);transform:translateY(-2px);box-shadow:0 10px 30px rgba(245,158,11,0.15)}
+  .card.mine{border-color:#f59e0b;background:linear-gradient(180deg,#1a1333 0%,#130e1f 100%)}
+  
+  .price-tag{font-size:22px;font-weight:900;color:#fbbf24;transition:transform 0.2s, color 0.2s, text-shadow 0.2s; display:inline-block;}
+  .flash-up{color:#10b981 !important;text-shadow:0 0 15px rgba(16,185,129,0.7);transform:scale(1.1)}
+  .flash-down{color:#ef4444 !important;text-shadow:0 0 15px rgba(239,68,68,0.7);transform:scale(0.95)}
+  
+  .card-title{font-size:14px;font-weight:700;color:#fff;margin:10px 0}
+  .essence-box{background:#0a0710;border:1px solid #2d2447;border-radius:10px;padding:10px;font-size:11px;color:#94a3b8;font-style:italic;margin-top:10px;flex-grow:1}
+  
+  .btn{padding:8px 16px;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer;border:none;transition:all 0.2s;display:inline-flex;align-items:center;justify-content:center;gap:6px}
+  .btn-primary{background:linear-gradient(135deg,#f59e0b,#ef4444);color:#fff}
+  .btn-primary:hover{opacity:0.9;transform:scale(1.02)}
+  .btn-outline{background:transparent;border:1px solid #8b5cf6;color:#c4b5fd}
+  .btn-outline:hover{background:rgba(139,92,246,0.1)}
+  .btn-success{background:transparent;border:1px solid #10b981;color:#10b981}
+  .btn-success:hover{background:rgba(16,185,129,0.15)}
+  .btn-danger-outline{background:transparent;border:1px solid #ef4444;color:#ef4444;box-shadow:0 0 15px rgba(239,68,68,0.4)}
+  .btn-danger-outline:hover{background:rgba(239,68,68,0.1)}
+
+  .mint-form{background:#130e1f;border:1px solid #f59e0b;border-radius:20px;padding:30px;max-width:700px;margin:0 auto;box-shadow:0 0 40px rgba(245,158,11,0.1)}
+  .form-group{margin-bottom:20px}
+  .form-group label{display:block;font-size:11px;color:#a78bfa;font-weight:700;margin-bottom:8px;text-transform:uppercase}
+  .form-control{width:100%;background:#0a0710;border:1px solid #2d2447;color:#fff;padding:14px;border-radius:10px;font-size:14px;font-family:inherit}
+  .form-control:focus{outline:none;border-color:#f59e0b}
+  textarea.form-control{resize:vertical;min-height:120px}
+  
+  .scanner-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.9);z-index:100;display:none;align-items:center;justify-content:center;flex-direction:column}
+  .scanner-box{width:300px;height:4px;background:#2d2447;border-radius:2px;overflow:hidden;margin-top:20px}
+  .scanner-bar{width:0%;height:100%;background:#f59e0b;animation:scan 2s forwards}
+  @keyframes scan { to { width: 100%; } }
+
+  .log-panel{background:#0a0710;border:1px solid #2d2447;border-radius:16px;padding:18px;font-family:monospace;font-size:11px;max-height:300px;overflow-y:auto;transition:all 0.3s}
+  .log-panel.auto-active{border-color:#ef4444;box-shadow:0 0 20px rgba(239,68,68,0.2) inset}
+  .log-line{padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.05);color:#cbd5e1;animation:fadeIn 0.2s ease-out}
+  .log-line b{color:#f59e0b}
+  
+  .dynamic-proposal { transition: opacity 0.3s ease-in-out; }
+  .profit-list { max-height: 230px; overflow-y: auto; padding-right: 5px; }
+  .profit-item { display:flex; justify-content:space-between; padding:10px; border-bottom:1px solid rgba(255,255,255,0.05); animation:fadeIn 0.2s ease-out; }
+
+  @keyframes fadeIn { from { opacity:0; transform:translateX(-10px); } to { opacity:1; transform:translateX(0); } }
+  @keyframes pulseAuto { 0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(245,158,11,0.7); } 70% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(245,158,11,0); } 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(245,158,11,0); } }
+  .auto-pulse { animation: pulseAuto 2s infinite; }
+
+  /* Section Sécurité & Prévisions */
+  .security-box{background:#0a0710;border:1px solid #2d2447;border-radius:12px;padding:24px;margin-bottom:24px}
+  .sec-row{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #1a1333;padding-bottom:14px;margin-bottom:14px}
+  .sec-row:last-child{border-bottom:none;padding-bottom:0;margin-bottom:0}
+
+  .forecast-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 24px; }
+  .forecast-card { background: #130e1f; border: 1px solid #2d2447; border-radius: 14px; padding: 18px; text-align: center; }
+  .forecast-card h4 { color: #a78bfa; font-size: 12px; text-transform: uppercase; margin-bottom: 8px; }
+  .forecast-val { font-size: 20px; font-weight: 900; color: #fbbf24; }
+</style>
+</head>
+<body>
+
+<div class="ticker-wrap">
+  <div class="ticker" id="ticker-content"></div>
+</div>
+
+<div class="header">
+  <div class="brand">
+    <div class="brand-icon">✨</div>
+    <div>
+      <div class="brand-title">Bourse <span>Nostalgie</span></div>
+      <div class="brand-sub">Titrisation Live & Flux Auto</div>
+    </div>
+  </div>
+  <div style="display:flex; align-items:center; gap: 16px;">
+    <button id="btn-automation" class="btn btn-primary auto-pulse" style="padding: 10px 20px; font-size: 14px;" onclick="toggleAutomation()">
+      🚀 Activer Flux Auto
+    </button>
+    <div style="background:#0a0710;border:1px solid #8b5cf6;border-radius:12px;padding:8px 16px;text-align:right">
+      <div style="font-size:10px;color:#a78bfa;font-weight:700;display:flex;align-items:center;justify-content:flex-end;gap:4px">
+        ☁️ CLOUD WALLET <div style="width:6px;height:6px;background:#10b981;border-radius:50%;box-shadow:0 0 5px #10b981"></div>
+      </div>
+      <div style="color:#f59e0b;font-weight:900;font-size:16px" id="user-balance">14 500 ¤</div>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+  <div class="hero">
+    <h2 style="font-size:24px;font-weight:900;color:#fff;margin-bottom:8px">Le premier marché fondé sur l'expérience humaine.</h2>
+    <p style="color:#cbd5e1;max-width:800px;font-size:14px">
+      Explorez la bibliothèque live, observez la fluctuation, titrisez vos souvenirs ou activez le <b>Flux Continu Ultra-Rapide</b> avec intelligence prédictive intégrée.
+    </p>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="lbl">Vécus Échangés (Live)</div>
+        <div class="val" id="stat-trades">1 024</div>
+      </div>
+      <div class="stat-card">
+        <div class="lbl">Volume Échangé (24h)</div>
+        <div class="val" style="color:#10b981" id="stat-volume">3.40M ¤</div>
+      </div>
+      <div class="stat-card" id="stat-card-trend">
+        <div class="lbl">Tendance Marché</div>
+        <div class="val" style="color:#f59e0b" id="stat-trend">+4.2% ↗</div>
+      </div>
+      <div class="stat-card">
+        <div class="lbl">Mes Actifs Créés</div>
+        <div class="val" style="color:#a78bfa" id="stat-my-assets">2</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('catalog', this)">📚 Marché Global Live</button>
+    <button class="tab-btn" onclick="switchTab('mint', this)">✨ Titriser mon Vécu</button>
+    <button class="tab-btn" onclick="switchTab('trades', this)">🤝 Échanges, Gains & Logs</button>
+    <button class="tab-btn" onclick="switchTab('forecast', this)">📈 Prévisions IA & Analytics</button>
+    <button class="tab-btn" onclick="switchTab('account', this)">🔐 Cloud & Sécurité</button>
+  </div>
+
+  <!-- TAB 1 : CATALOGUE -->
+  <div id="tab-catalog" class="tab-content">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <h3 style="color:#fff;font-weight:800">Dernières Introductions (Top 40 / 1000+)</h3>
+      <input type="text" placeholder="Rechercher une émotion..." style="background:#130e1f;border:1px solid #2d2447;color:#fff;padding:8px 16px;border-radius:20px;font-size:12px;outline:none;width:250px" onkeyup="filterCatalog(this.value)">
+    </div>
+    <div class="catalog-grid" id="catalog-container"></div>
+  </div>
+
+  <!-- TAB 2 : TITRISER -->
+  <div id="tab-mint" class="tab-content" style="display:none">
+    <div class="mint-form">
+      <h2 style="color:#fff;font-size:22px;font-weight:900;text-align:center;margin-bottom:8px">Forger un Nouvel Actif</h2>
+      <p style="color:#94a3b8;text-align:center;font-size:12px;margin-bottom:24px">L'algorithme analysera la profondeur de vos mots pour fixer le cours de votre souvenir.</p>
+      <div class="form-group">
+        <label>Titre de l'Expérience</label>
+        <input type="text" id="mint-title" class="form-control" placeholder="ex: Nuit sous les étoiles...">
+      </div>
+      <div class="form-group">
+        <label>Catégorie de l'Âme</label>
+        <select id="mint-cat" class="form-control">
+          <option value="Voyage">Voyage & Découverte</option>
+          <option value="Intérieur">Traversée Intérieure</option>
+          <option value="Épiphanie">Épiphanie & Révélation</option>
+          <option value="Rencontre">Rencontre Bouleversante</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Essence du Souvenir (Détaillez pour plus de valeur)</label>
+        <textarea id="mint-desc" class="form-control" placeholder="Racontez la transformation ressentie..."></textarea>
+      </div>
+      <button class="btn btn-primary" style="font-size:16px;padding:14px;width:100%" onclick="mintAsset()">🧠 Évaluer & Introduire en Bourse</button>
+    </div>
+  </div>
+
+  <!-- TAB 3 : TRADES -->
+  <div id="tab-trades" class="tab-content" style="display:none">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:24px">
+      <div>
+        <h3 style="color:#fff;font-weight:800;margin-bottom:12px">Demandes de Connexion (Live)</h3>
+        <div style="background:#130e1f;border:1px solid #2d2447;border-radius:16px;padding:20px;text-align:center;min-height:220px;display:flex;flex-direction:column;justify-content:center">
+          <div id="live-proposal-box" class="dynamic-proposal"></div>
+        </div>
+      </div>
+      <div>
+        <h3 style="color:#fff;font-weight:800;margin-bottom:12px">Gains Sécurisés (Wallet Positif)</h3>
+        <div style="background:#0a0710;border:1px solid #10b981;border-radius:16px;padding:16px;height:100%">
+          <div style="display:flex;justify-content:space-between;margin-bottom:12px;border-bottom:1px dashed #2d2447;padding-bottom:8px">
+            <span style="color:#94a3b8;font-size:11px;text-transform:uppercase">Actif Échangé</span>
+            <span style="color:#94a3b8;font-size:11px;text-transform:uppercase">Profit (¤)</span>
+          </div>
+          <div class="profit-list" id="positive-trades-list"></div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <h3 style="color:#fff;font-weight:800;margin-bottom:12px">Registre Akshique (Global Live & Flux Auto)</h3>
+      <div class="log-panel" id="live-logs"></div>
+    </div>
+  </div>
+
+  <!-- TAB 4 : PRÉVISIONS IA & ANALYTICS -->
+  <div id="tab-forecast" class="tab-content" style="display:none">
+    <div class="mint-form" style="max-width:900px;">
+      <h2 style="color:#fff;font-size:22px;font-weight:900;text-align:center;margin-bottom:8px">📈 Moteur Prédictif & Tendances Émotionnelles</h2>
+      <p style="color:#94a3b8;text-align:center;font-size:12px;margin-bottom:24px">Analyse par intelligence artificielle des flux de nostalgie et projection des cours à court terme.</p>
+      
+      <div class="forecast-grid">
+        <div class="forecast-card">
+          <h4>Indice Volatilité Âme</h4>
+          <div class="forecast-val" style="color:#10b981">Faible (1.8%)</div>
+        </div>
+        <div class="forecast-card">
+          <h4>Projection Cours (24h)</h4>
+          <div class="forecast-val" id="forecast-projection">+12.4% ↗</div>
+        </div>
+        <div class="forecast-card">
+          <h4>Secteur le plus porteur</h4>
+          <div class="forecast-val" style="color:#f59e0b">Épiphanie</div>
+        </div>
+        <div class="forecast-card">
+          <h4>Statut Agent Auto</h4>
+          <div class="forecast-val" id="forecast-bot-status" style="color:#ef4444">En Veille</div>
+        </div>
+      </div>
+
+      <div style="background:#0a0710;border:1px solid #2d2447;border-radius:12px;padding:20px">
+        <h4 style="color:#fff;margin-bottom:10px">Recommandation Stratégique</h4>
+        <p style="color:#cbd5e1;font-size:13px;line-height:1.6">
+          L'analyse des 1 000+ vécus indique une forte demande sur les catégories <b>Épiphanie</b> et <b>Traversée Intérieure</b>. Activer le flux automatique permet de maximiser la génération de plus-values sur ces créneaux à haute liquidité.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 5 : COMPTE ET SÉCURITÉ -->
+  <div id="tab-account" class="tab-content" style="display:none">
+    <div class="mint-form" style="max-width:700px;">
+      <div style="text-align:center;font-size:40px;margin-bottom:10px">🔐</div>
+      <h2 style="color:#fff;font-size:22px;font-weight:900;text-align:center;margin-bottom:8px">Paramètres de Gestion & Sécurité</h2>
+      <p style="color:#94a3b8;text-align:center;font-size:12px;margin-bottom:24px">Téléchargez et conservez vos identifiants d'accès en lieu sûr.</p>
+      
+      <div class="security-box">
+        <div class="sec-row">
+          <span style="color:#94a3b8;font-size:12px">Identifiant du compte (Email)</span>
+          <strong style="color:#fff;font-size:14px">elbrirchi47@gmail.com</strong>
+        </div>
+        <div class="sec-row">
+          <span style="color:#94a3b8;font-size:12px">Solde Sauvegardé (Cloud)</span>
+          <strong style="color:#10b981;font-size:16px" id="cloud-wallet-display">14 500 ¤</strong>
+        </div>
+        <div class="sec-row">
+          <span style="color:#94a3b8;font-size:12px">Mot de passe de gestion</span>
+          <strong style="color:#10b981;font-size:14px;letter-spacing:2px">••••••••••••••</strong>
+        </div>
+        <div class="sec-row">
+          <span style="color:#94a3b8;font-size:12px">Clé Akshique (Phrase de récupération)</span>
+          <strong style="color:#f59e0b;font-family:monospace;font-size:13px">BR-NOST-88X2-99L4-ZZQ1</strong>
+        </div>
+        <div class="sec-row">
+          <span style="color:#94a3b8;font-size:12px">Statut du Coffre</span>
+          <span style="background:rgba(16,185,129,0.2);color:#10b981;padding:4px 10px;border-radius:6px;font-weight:bold;font-size:10px">SYNCHRONISÉ & PROTÉGÉ</span>
+        </div>
+      </div>
+
+      <button class="btn btn-success" style="font-size:15px;padding:14px;width:100%" onclick="downloadCredentials()">
+        📥 Télécharger mes Identifiants et Mots de Passe (Fichier Sécurisé)
+      </button>
+    </div>
+  </div>
+
+</div>
+
+<div class="scanner-overlay" id="scanner">
+  <div style="font-size:40px;animation:pulse 1s infinite">🧠</div>
+  <h2 style="color:#fff;margin-top:20px;font-weight:800">Analyse de la profondeur émotionnelle...</h2>
+  <div class="scanner-box"><div class="scanner-bar"></div></div>
+</div>
+
+<script>
+// --- FONCTIONS UTILITAIRES & SÉCURITÉ ---
+function formatMoney(val) {
+  if(val == null) return "0";
+  return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+}
+function parseMoney(str) {
+  if(!str) return 0;
+  let parsed = parseInt(str.replace(/[^0-9]/g, ''));
+  return isNaN(parsed) ? 0 : parsed;
+}
+
+function escapeHTML(str) {
+    if (!str) return "";
+    return str.replace(/[&<>'"]/g, function(tag) {
+        const chars = { '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' };
+        return chars[tag] || tag;
+    });
+}
+
+// --- DONNÉES DE BASE (BIBLIOTHÈQUE) ---
+const sujets = ["Retraite", "Traversée", "Nuit", "Rencontre", "Ascension", "Séparation", "Errance", "Découverte", "Silence", "Éveil", "Sourire", "Vertige", "Chagrin", "Extase", "Oubli"];
+const contextes = ["dans l'Himalaya", "en Solitaire", "sous les Étoiles", "dans le Désert", "en Pleine Mer", "Urbaine", "au Bout du Monde", "dans la Brume", "au Crépuscule", "en Hiver", "sous la Pluie", "dans le Train"];
+const essences = [
+  "Dissolution temporaire de l'ego face à l'immensité. Une introspection foudroyante.",
+  "Apprentissage de l'humilité absolue et redéfinition du courage.",
+  "Prise de conscience soudaine de notre place dans l'univers. Un don de paix.",
+  "Partage sans parler la même langue. La puissance du don humain à l'état pur.",
+  "La destruction des anciennes fondations pour rebâtir une vie alignée.",
+  "Un silence si profond qu'il a permis d'entendre enfin ses propres pensées.",
+  "La beauté éphémère d'un instant qui répare des années de doute.",
+  "La nostalgie d'un temps qui n'a jamais existé, un sentiment d'anemoia."
+];
+const categories = ["Voyage", "Intérieur", "Épiphanie", "Rencontre"];
+const owners = ["Satoshi_Soul", "Elena_Wanderer", "Marco_Polo_99", "Artisan_Coeur", "Anonyme", "Luna_Dreamer", "Voyageur_Temporel", "Algo_Broker_01"];
+
+let catalog = [];
+let positiveTrades = [
+  { title: "Sourire d'un inconnu à Tokyo", profit: 850 },
+  { title: "Éveil au Crépuscule", profit: 1240 }
+];
+
+// Initialisation catalogue
+catalog.push({ id: 'V-MY-1', title: "Méditation face à l'Océan", category: 'Intérieur', value: 4500, owner: 'Moi', isMine: true, desc: "Comprendre que la marée emporte tout, même les peines les plus lourdes." });
+catalog.push({ id: 'V-MY-2', title: "Sourire d'un inconnu à Tokyo", category: 'Rencontre', value: 2100, owner: 'Moi', isMine: true, desc: "Un instant de grâce dans la frénésie, une connexion sans un mot." });
+
+for(let i = 0; i < 1000; i++) {
+  let title = sujets[Math.floor(Math.random()*sujets.length)] + " " + contextes[Math.floor(Math.random()*contextes.length)];
+  let isRare = Math.random() > 0.9;
+  catalog.push({
+    id: 'V-' + i,
+    title: title + (isRare ? ' ✨' : ''),
+    category: categories[Math.floor(Math.random()*categories.length)],
+    value: Math.floor(Math.random() * 8000) + 500 + (isRare ? 5000 : 0),
+    owner: owners[Math.floor(Math.random()*owners.length)],
+    isMine: false,
+    desc: essences[Math.floor(Math.random()*essences.length)]
+  });
+}
+
+function promoteAsset(id) { alert("Lien copié ! Partagez sur vos réseaux."); }
+function buyAsset(id) { 
+  let asset = catalog.find(a => a.id === id);
+  if(asset) alert(`Ordre d'échange envoyé à ${asset.owner} pour "${asset.title}".`); 
+}
+
+function renderCatalog(itemsToRender = catalog.slice(0, 40)) {
+  const container = document.getElementById('catalog-container');
+  if(!container) return;
+  if(itemsToRender.length === 0) {
+    container.innerHTML = '<p style="color:#94a3b8;grid-column:1/-1;text-align:center;padding:40px">Aucun vécu trouvé.</p>';
+    return;
+  }
+  
+  container.innerHTML = itemsToRender.map(asset => `
+    <div class="card ${asset.isMine ? 'mine' : ''}" id="card-${asset.id}">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
+        <span style="font-size:10px;background:#2d2447;padding:3px 8px;border-radius:10px;color:#c4b5fd">${escapeHTML(asset.category)}</span>
+        <div class="price-tag" id="price-${asset.id}">${formatMoney(asset.value)} ¤</div>
+      </div>
+      <div class="card-title">${escapeHTML(asset.title)}</div>
+      <div style="font-size:10px;color:#94a3b8">Détenu par: <span style="color:#f59e0b">${escapeHTML(asset.owner)}</span></div>
+      <div class="essence-box">"${escapeHTML(asset.desc)}"</div>
+      <div style="margin-top:16px">
+        ${asset.isMine 
+          ? `<button class="btn btn-outline" style="width:100%" onclick="promoteAsset('${asset.id}')">📢 Promouvoir mon Actif</button>`
+          : `<button class="btn btn-primary" style="width:100%" onclick="buyAsset('${asset.id}')">Acheter / Échanger</button>`}
+      </div>
+    </div>
+  `).join('');
+}
+
+function filterCatalog(term) {
+  const filtered = catalog.filter(c => c.title.toLowerCase().includes(term.toLowerCase()) || c.desc.toLowerCase().includes(term.toLowerCase()));
+  renderCatalog(filtered.slice(0, 40));
+}
+
+function initTicker() {
+  const ticker = document.getElementById('ticker-content');
+  if(!ticker) return;
+  let html = '';
+  for(let i=0; i<40; i++) {
+    let item = catalog[Math.floor(Math.random()*catalog.length)];
+    let trend = Math.random() > 0.5 ? 'up' : 'down';
+    let sign = trend === 'up' ? '▲ +' : '▼ -';
+    html += `<div class="ticker-item">${escapeHTML(item.title)} : <b>${formatMoney(item.value)} ¤</b> <span class="${trend}">${sign}${(Math.random()*3).toFixed(1)}%</span></div>`;
+  }
+  ticker.innerHTML = html + html; 
+}
+
+// --- PROPOSITIONS DYNAMIQUES (MANUELLES) ---
+function loadNewProposal() {
+  const box = document.getElementById('live-proposal-box');
+  if(!box) return;
+  box.style.opacity = '0'; 
+  
+  setTimeout(() => {
+    let randomAsset = catalog[Math.floor(Math.random() * catalog.length)];
+    let profit = Math.floor(randomAsset.value * (0.1 + Math.random() * 0.3));
+    let offerValue = randomAsset.value + profit; 
+    
+    box.innerHTML = `
+      <div style="font-size:40px;margin-bottom:10px">🌌</div>
+      <h4 style="color:#fff">Une âme souhaite échanger avec vous</h4>
+      <p style="color:#94a3b8;font-size:12px;margin:10px 0">On vous propose un contrat de <b>${formatMoney(offerValue)} ¤</b> en échange de droits sur "<i>${escapeHTML(randomAsset.title)}</i>".</p>
+      <button class="btn btn-primary" style="width:100%" onclick="acceptProposal('${randomAsset.id}', ${profit}, ${offerValue})">Accepter l'Offre (+ ${formatMoney(profit)} ¤ de gain)</button>
+      <button class="btn btn-outline" style="margin-top:8px;width:100%" onclick="loadNewProposal()">Ignorer (Recharger une offre)</button>
+    `;
+    box.style.opacity = '1';
+  }, 300); 
+}
+
+function acceptProposal(assetId, profit, totalValue) {
+  let asset = catalog.find(a => a.id === assetId);
+  if(!asset) return;
+
+  const balEl = document.getElementById('user-balance');
+  const cloudBalEl = document.getElementById('cloud-wallet-display');
+  let curBal = parseMoney(balEl.innerText);
+  let newBal = curBal + totalValue;
+  
+  balEl.innerText = formatMoney(newBal) + ' ¤';
+  if(cloudBalEl) cloudBalEl.innerText = formatMoney(newBal) + ' ¤';
+
+  positiveTrades.unshift({ title: asset.title, profit: profit });
+  if(positiveTrades.length > 50) positiveTrades.pop();
+  renderPositiveTrades();
+
+  addLog(`✅ <b>TRADE MANUEL VALIDÉ</b> : Gain net de <b>+${formatMoney(profit)} ¤</b> sur "<i>${escapeHTML(asset.title)}</i>"`);
+  loadNewProposal();
+}
+
+function renderPositiveTrades() {
+  const container = document.getElementById('positive-trades-list');
+  if(!container) return;
+  container.innerHTML = positiveTrades.map(trade => `
+    <div class="profit-item">
+      <span style="color:#e2e8f0;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:65%">${escapeHTML(trade.title)}</span>
+      <span style="color:#10b981;font-weight:900;font-size:13px">+ ${formatMoney(trade.profit)} ¤</span>
+    </div>
+  `).join('');
+}
+
+// --- LOGS GLOBAUX ---
+const logLines = [];
+function addLog(text) {
+  logLines.unshift(text);
+  if(logLines.length > 40) logLines.pop();
+  const logPanel = document.getElementById('live-logs');
+  if(logPanel) {
+    logPanel.innerHTML = logLines.map(l => `<div class="log-line">› ${l}</div>`).join('');
+  }
+}
+
+
+// ==========================================
+// 🚀 SYSTÈMES DE FLUX AUTO & PRÉVISIONS
+// ==========================================
+let isAutoActive = false;
+let autoInterval = null;
+
+function toggleAutomation() {
+    isAutoActive = !isAutoActive;
+    const btn = document.getElementById('btn-automation');
+    const logPanel = document.getElementById('live-logs');
+    const botStatus = document.getElementById('forecast-bot-status');
+    
+    if(isAutoActive) {
+        if(btn) {
+            btn.innerHTML = '🛑 Stopper Flux Auto';
+            btn.classList.replace('btn-primary', 'btn-danger-outline');
+            btn.classList.remove('auto-pulse');
+        }
+        if(logPanel) logPanel.classList.add('auto-active');
+        if(botStatus) {
+            botStatus.innerText = 'Actif (Turbo)';
+            botStatus.style.color = '#10b981';
+        }
+        
+        addLog("<span style='color:#ef4444'>🚀 <b>FLUX CONTINU ULTRA-RAPIDE ACTIVÉ</b> — Génération & Trading autonome en cours.</span>");
+        
+        // Exécution haute fréquence (250ms)
+        autoInterval = setInterval(autoTick, 250); 
+    } else {
+        if(btn) {
+            btn.innerHTML = '🚀 Activer Flux Auto';
+            btn.classList.replace('btn-danger-outline', 'btn-primary');
+            btn.classList.add('auto-pulse');
+        }
+        if(logPanel) logPanel.classList.remove('auto-active');
+        if(botStatus) {
+            botStatus.innerText = 'En Veille';
+            botStatus.style.color = '#ef4444';
+        }
+        
+        addLog("<span style='color:#f59e0b'>🛑 <b>Flux automatique arrêté.</b> Retour au mode standard.</span>");
+        clearInterval(autoInterval);
+    }
+}
+
+function autoTick() {
+    let r = Math.random();
+    
+    if (r < 0.40) {
+        // 1. AUTO-TRADE & GAINS POSITIFS
+        let randomAsset = catalog[Math.floor(Math.random() * catalog.length)];
+        let profit = Math.floor(randomAsset.value * (0.08 + Math.random() * 0.35));
+        let offerValue = randomAsset.value + profit;
+        
+        const balEl = document.getElementById('user-balance');
+        const cloudBalEl = document.getElementById('cloud-wallet-display');
+        let curBal = parseMoney(balEl.innerText);
+        let newBal = curBal + offerValue; 
+        
+        if(balEl) balEl.innerText = formatMoney(newBal) + ' ¤';
+        if(cloudBalEl) cloudBalEl.innerText = formatMoney(newBal) + ' ¤';
+        
+        positiveTrades.unshift({ title: randomAsset.title, profit: profit });
+        if(positiveTrades.length > 50) positiveTrades.pop();
+        
+        if(document.getElementById('tab-trades') && document.getElementById('tab-trades').style.display !== 'none') {
+            renderPositiveTrades();
+        }
+        
+        addLog(`⚡ <b style="color:#10b981">AUTO-TRADE</b> : Profit +${formatMoney(profit)} ¤ sur "<i>${escapeHTML(randomAsset.title)}</i>"`);
+        
+        let tradesEl = document.getElementById('stat-trades');
+        if(tradesEl) tradesEl.innerText = formatMoney(parseMoney(tradesEl.innerText) + 1);
+        
+    } 
+    else if (r < 0.75) {
+        // 2. AUTO-GÉNÉRATION DE BIBLIOTHÈQUE & ANNONCE
+        let title = sujets[Math.floor(Math.random()*sujets.length)] + " " + contextes[Math.floor(Math.random()*contextes.length)];
+        let cat = categories[Math.floor(Math.random()*categories.length)];
+        let desc = essences[Math.floor(Math.random()*essences.length)];
+        let isRare = Math.random() > 0.8;
+        if(isRare) title += ' ✨';
+        
+        let baseValue = 1200 + (desc.length * 15) + Math.floor(Math.random() * 5000) + (isRare ? 6000 : 0);
+        
+        let newAsset = {
+            id: 'V-AUTO-' + Date.now() + Math.floor(Math.random()*1000),
+            title: title,
+            category: cat,
+            value: baseValue,
+            owner: 'Bot_Gen_' + Math.floor(Math.random()*99),
+            isMine: false,
+            desc: desc
+        };
+        
+        catalog.unshift(newAsset);
+        if(catalog.length > 1500) catalog.pop();
+        
+        if(document.getElementById('tab-catalog') && document.getElementById('tab-catalog').style.display !== 'none') {
+            renderCatalog();
+        }
+        
+        // Annonce intégrée dans le flux
+        addLog(`🧬 <b style="color:#a78bfa">ANNONCE BIBLIOTHÈQUE</b> : Nouveau vécu forgé « <i>${escapeHTML(title)}</i> » [${cat}] coté à ${formatMoney(baseValue)} ¤`);
+    }
+    else {
+        // 3. FLUCTUATION MARCHÉ & PRÉVISIONS DYNAMIQUES
+        const displayedCards = document.querySelectorAll('.price-tag');
+        if(displayedCards.length > 0) {
+            let loops = Math.floor(Math.random()*3)+2;
+            for(let i=0; i<loops; i++) {
+                const randomIdx = Math.floor(Math.random() * displayedCards.length);
+                const priceEl = displayedCards[randomIdx];
+                let currentVal = parseMoney(priceEl.innerText);
+                if(currentVal > 0) {
+                    const variationPct = (Math.random() * 0.14) - 0.05;
+                    let newVal = Math.floor(currentVal * (1 + variationPct));
+                    priceEl.innerText = formatMoney(newVal) + ' ¤';
+                    
+                    priceEl.classList.remove('flash-up', 'flash-down');
+                    void priceEl.offsetWidth;
+                    if(newVal > currentVal) priceEl.classList.add('flash-up');
+                    else priceEl.classList.add('flash-down');
+                }
+            }
+        }
+        
+        const volEl = document.getElementById('stat-volume');
+        if(volEl) {
+            let currentVol = parseFloat(volEl.innerText.replace(/[^0-9.]/g, ''));
+            if(!isNaN(currentVol)) {
+                volEl.innerText = (currentVol + (Math.random() * 0.1)).toFixed(2) + 'M ¤';
+            }
+        }
+
+        // Mise à jour prévision dynamique
+        const projEl = document.getElementById('forecast-projection');
+        if(projEl) {
+            let randProj = (10 + Math.random() * 8).toFixed(1);
+            projEl.innerText = `+${randProj}% ↗`;
+        }
+        
+        addLog(`📈 <b style="color:#f59e0b">FLUX PRÉDICTIF</b> : Réajustement haute fréquence de la liquidité.`);
+    }
+}
+
+// Mode passif lent si auto inactif
+setInterval(() => {
+    if(!isAutoActive) {
+        let randomAsset = catalog[Math.floor(Math.random()*catalog.length)];
+        let randomBuyer = owners[Math.floor(Math.random()*owners.length)];
+        addLog(`🤝 <b>${escapeHTML(randomBuyer)}</b> a acquis "<i>${escapeHTML(randomAsset.title)}</i>" pour ${formatMoney(randomAsset.value)} ¤`);
+    }
+}, 5000);
+
+
+// --- TITRISATION MANUELLE ---
+function mintAsset() {
+  const titleInput = document.getElementById('mint-title');
+  const catInput = document.getElementById('mint-cat');
+  const descInput = document.getElementById('mint-desc');
+  
+  if(!titleInput || !catInput || !descInput) return;
+  const title = titleInput.value.trim();
+  const cat = catInput.value;
+  const desc = descInput.value.trim();
+  
+  if(!title || !desc) {
+    alert("Veuillez renseigner le titre et l'essence de votre souvenir.");
+    return;
+  }
+
+  const scanner = document.getElementById('scanner');
+  if(scanner) scanner.style.display = 'flex';
+  
+  setTimeout(() => {
+    if(scanner) scanner.style.display = 'none';
+    
+    let baseValue = 1000 + (desc.length * 15) + Math.floor(Math.random() * 4000);
+    
+    catalog.unshift({
+      id: 'V-MY-' + Date.now(),
+      title: title, 
+      category: cat,
+      value: baseValue,
+      owner: 'Moi',
+      isMine: true,
+      desc: desc
+    });
+    
+    const myAssetsEl = document.getElementById('stat-my-assets');
+    if(myAssetsEl) myAssetsEl.innerText = parseInt(myAssetsEl.innerText) + 1;
+    
+    const balEl = document.getElementById('user-balance');
+    const cloudBalEl = document.getElementById('cloud-wallet-display');
+    let curBal = parseMoney(balEl ? balEl.innerText : '0');
+    let newBal = curBal + baseValue;
+    
+    if(balEl) balEl.innerText = formatMoney(newBal) + ' ¤';
+    if(cloudBalEl) cloudBalEl.innerText = formatMoney(newBal) + ' ¤';
+
+    alert(`✨ Vécu titrisé avec succès !\n\nL'algorithme a évalué ce souvenir à : ${formatMoney(baseValue)} ¤.`);
+    
+    titleInput.value = '';
+    descInput.value = '';
+    
+    switchTab('catalog', document.querySelector('.tab-btn'));
+    renderCatalog();
+    addLog(`✨ Nouveau vécu forgé par vous : "${escapeHTML(title)}" (Cours : ${formatMoney(baseValue)} ¤)`);
+
+  }, 2200);
+}
+
+// --- TÉLÉCHARGEMENT IDENTIFIANTS ---
+function downloadCredentials() {
+  const dateStr = new Date().toLocaleDateString('fr-FR');
+  const cloudBalEl = document.getElementById('cloud-wallet-display');
+  const currentBal = cloudBalEl ? cloudBalEl.innerText : '14 500 ¤';
+  
+  const content = `================================================
+BOURSE NOSTALGIE - COFFRE-FORT CLOUD ÉMOTIONNEL
+================================================
+Document généré le : ${dateStr}
+
+🔐 IDENTIFIANTS DE GESTION & SÉCURITÉ
+------------------------------------------------
+Identifiant (Email) : elbrirchi47@gmail.com
+Mot de passe        : [Généré par votre portefeuille Web3]
+Clé Akshique        : BR-NOST-88X2-99L4-ZZQ1
+Solde Sauvegardé    : ${currentBal}
+------------------------------------------------
+
+⚠️ CONSIGNES DE SÉCURITÉ :
+1. Conservez ce fichier en lieu sûr (hors ligne de préférence).
+2. Ne partagez jamais votre Clé Akshique.
+
+Statut du coffre : ACTIF & PROTÉGÉ (SSL Tiers-3 / Crypté / Cloud Sync)
+================================================`;
+
+  const blob = new Blob([content], { type: 'text/plain' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'Identifiants_Bourse_Nostalgie_Cloud.txt';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  
+  alert("✅ Le fichier contenant vos identifiants sécurisés a été téléchargé avec succès !");
+}
+
+function switchTab(tabId, btnElement) {
+  document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
+  document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+  
+  const targetTab = document.getElementById('tab-' + tabId);
+  if(targetTab) targetTab.style.display = 'block';
+  
+  if(btnElement) {
+      btnElement.classList.add('active');
+  } else {
+      // Trouve le bouton correspondant si appelé par ID
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+          if(btn.getAttribute('onclick') && btn.getAttribute('onclick').includes(tabId)) {
+              btn.classList.add('active');
+          }
+      });
+  }
+}
+
+window.onload = () => {
+  renderCatalog();
+  initTicker();
+  loadNewProposal();
+  renderPositiveTrades();
+  addLog("<b>Système en ligne.</b> Connexion au Cloud Wallet & Moteur Prédictif initialisés.");
+  addLog("<b>Prêt :</b> Flux continu ultra-rapide et générateur de bibliothèque prêts.");
+};
+</script>
+</body>
+</html>
